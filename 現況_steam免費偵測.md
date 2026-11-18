@@ -55,7 +55,7 @@ steam-free-watch/
 - seen.json 沒有變動的期間 repo 不會有 commit → 加一個每月一次的保活 commit（或寫入 `last_run`），確保 60 天內一定有活動。
 
 ## 分階段
-- v1：上面全部（Steam 限時免費 → ntfy）。
+- v1：上面全部（Steam 限時免費 → Telegram）。
 - v2：免費週末另外分類；加 IsThereAnyDeal API 交叉比對（需申請 key）。
 - v3（可選）：Epic / GOG。自動領取（ASF）不在規劃內，除非使用者另外決定。
 
