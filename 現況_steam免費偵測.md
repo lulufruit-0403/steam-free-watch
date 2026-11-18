@@ -1,6 +1,6 @@
 # 現況：Steam 限時免費偵測器
 
-最後更新：2026-11-19｜階段：v1 上線，推播已改成 Telegram（測試通知已從 Actions 送出，等使用者確認 iPhone 跳通知）
+最後更新：2026-11-19｜階段：v1 上線，推播已改成 Telegram，iPhone 確認有跳通知（2026-11-19）
 
 決定：公開 repo＋Telegram 推播（原本用 ntfy，iPhone 不跳通知而放棄）。
 - Repo：https://github.com/lulufruit-0403/steam-free-watch （公開，main 分支）
@@ -69,11 +69,11 @@ steam-free-watch/
 
 ## ntfy → Telegram（2026-11-18～19）
 - ntfy：訊息有到伺服器，但 iOS 從不跳通知（已知問題 https://docs.ntfy.sh/known-issues/ ；https://github.com/binwiederhier/ntfy/issues/1191 ），所以放棄。
-- 2026-11-19：commit `bb66d2b` 把推播改成 Telegram 並已 push。測試通知 run https://github.com/lulufruit-0403/steam-free-watch/actions/runs/44342750388 成功，Telegram API 接受了訊息。
+- 2026-11-19：commit `bb66d2b` 把推播改成 Telegram 並已 push。測試通知 run https://github.com/lulufruit-0403/steam-free-watch/actions/runs/44342750388 成功，Telegram API 接受了訊息；第二則 run 44343200917 後，使用者確認 iPhone 有跳通知。
 
 ## 下一步
-1. 使用者確認 iPhone 有跳 Telegram 通知。
-2. 確認成功後：刪除 Secret `NTFY_TOPIC`（先問過使用者）。
+1. 刪除不用的 Secret `NTFY_TOPIC`（先問過使用者）。
+2. 等下次 Steam 有限時免費時，看有沒有收到通知（驗證偵測邏輯）。
 
 ## 還沒確認
 - 真的有限時免費時，兩個查詢都抓得到（目前沒有活動可驗證）→ 下次 Steam 送遊戲時看有沒有收到通知。
