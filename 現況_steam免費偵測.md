@@ -1,6 +1,8 @@
 # 現況：Steam 限時免費偵測器
 
-最後更新：2026-11-18｜階段：初步設計完成，尚未寫程式
+最後更新：2026-11-18｜階段：v1 程式完成並在本機測過，尚未放上 GitHub
+
+決定：公開 repo＋ntfy 推播。本資料夾已 git init（main 分支），尚無 remote。
 
 ## 目標
 偵測 Steam「限時免費領取」（原價 > 0、折扣 100%，領了永久保留），有新的就推播到手機。
@@ -50,7 +52,18 @@ steam-free-watch/
 - v2：免費週末另外分類；加 IsThereAnyDeal API 交叉比對（需申請 key）。
 - v3（可選）：Epic / GOG。自動領取（ASF）不在規劃內，除非使用者另外決定。
 
-## 下一步
-1. 使用者決定：repo 公開或私人；推播用 ntfy 是否 OK。
-2. 寫 check.py + 測試，在本機跑一次。
-3. 建 GitHub repo、設定 Secrets、推上去（push 前要先問使用者）。
+## v1 已完成（實際檔案）
+- `check.py`：只用標準庫；`--dry-run`、`--test-notify`。推播用 ntfy JSON 發布（中文標題不會亂碼）。
+- `tests/test_filter.py`：7 個測試。故意把 is_giveaway 改成永遠 True → 3 個失敗，確認抓得到。
+- `.github/workflows/check.yml`：每 4 小時＋手動執行（可勾「只送測試通知」）；有變動才 commit seen.json。
+- 本機實跑：解析 100 列中的 99 列（1 列是套組，依設計略過），appdetails 正常；當下限時免費 0 筆。
+
+## 還沒確認
+- GitHub 的美國機房 IP 抓 Steam 會不會被擋或拿到不同結果（第一次在 Actions 上跑才知道）。
+- 真的有限時免費時，兩個查詢都抓得到（目前沒有活動可驗證）。
+- 手機推播實際收不收得到（要等使用者設好 ntfy）。
+
+## 下一步（需要使用者）
+1. 在 GitHub 網頁建一個公開的空 repo（本機沒有 gh CLI），把網址給 Claude → Claude 設定 remote，問過使用者後 push。
+2. 手機裝 ntfy、訂閱一個亂數主題名稱；在 repo 的 Secrets 新增 `NTFY_TOPIC`。
+3. Actions 手動執行「只送測試通知」，確認手機收到。
