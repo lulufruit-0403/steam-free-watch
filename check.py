@@ -1,7 +1,7 @@
-"""Steam 限時免費偵測：找出「原價 > 0、折扣 100%」的項目，新出現的推播到 ntfy。
+"""Steam 限時免費偵測：找出「原價 > 0、折扣 100%」的項目，新出現的推播到 Telegram。
 
 用法：
-  python check.py              # 正常執行（沒設 NTFY_TOPIC 時只印出、不推播）
+  python check.py              # 正常執行（沒設 TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID 時只印出、不推播）
   python check.py --dry-run    # 只印出，不推播、不寫 seen.json
   python check.py --test-notify  # 送一則測試通知到手機
 """
@@ -12,12 +12,13 @@ import re
 import sys
 import time
 import urllib.parse
+import urllib.error
 import urllib.request
 from datetime import datetime, timedelta, timezone
 
 SEARCH_URL = "https://store.steampowered.com/search/results/"
 DETAILS_URL = "https://store.steampowered.com/api/appdetails"
-NTFY_URL = "https://ntfy.sh/"
+TELEGRAM_URL = "https://api.telegram.org/bot{token}/sendMessage"
 SEEN_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "seen.json")
 COMMON = {"cc": "tw", "l": "tchinese", "infinite": "1"}
 UA = "steam-free-watch/1.0"
@@ -73,6 +74,15 @@ def diff_seen(seen_items, current):
     return new_ids, items
 
 
+def build_telegram_text(title, message, url=None):
+    """組 Telegram HTML 訊息；遊戲名可能含 & < >，一律跳脫。"""
+    e = html.escape
+    lines = [f"<b>{e(title)}</b>", e(message)]
+    if url:
+        lines.append(f'<a href="{e(url, quote=True)}">{e(url)}</a>')
+    return "\n".join(l for l in lines if l)
+
+
 def format_message(info):
     kind = "DLC（需要本體）" if info.get("type") == "dlc" else "遊戲"
     price = info.get("initial_formatted") or ""
@@ -113,13 +123,16 @@ def fetch_details(appid):
     return entry.get("data") if entry.get("success") else None
 
 
-def notify(topic, title, message, click=None, tags="video_game"):
-    body = {"topic": topic, "title": title, "message": message, "tags": [tags]}
-    if click:
-        body["click"] = click
-    req = urllib.request.Request(NTFY_URL, data=json.dumps(body).encode("utf-8"),
+def notify(cfg, title, message, url=None):
+    token, chat_id = cfg
+    body = {"chat_id": chat_id, "text": build_telegram_text(title, message, url), "parse_mode": "HTML"}
+    req = urllib.request.Request(TELEGRAM_URL.format(token=token), data=json.dumps(body).encode("utf-8"),
                                  headers={"Content-Type": "application/json", "User-Agent": UA})
-    urllib.request.urlopen(req, timeout=30).read()
+    try:
+        urllib.request.urlopen(req, timeout=30).read()
+    except urllib.error.HTTPError as err:
+        # 不印 URL（含 token），只印 Telegram 回的錯誤說明
+        raise SystemExit(f"Telegram 推播失敗：HTTP {err.code} {err.read().decode('utf-8', 'replace')}") from None
 
 
 def load_seen():
@@ -138,13 +151,15 @@ def save_seen(seen):
 
 
 def main(argv):
-    topic = os.environ.get("NTFY_TOPIC", "").strip()
+    token = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()
+    chat_id = os.environ.get("TELEGRAM_CHAT_ID", "").strip()
+    cfg = (token, chat_id) if token and chat_id else None
     dry = "--dry-run" in argv
 
     if "--test-notify" in argv:
-        if not topic:
-            sys.exit("沒有設定 NTFY_TOPIC")
-        notify(topic, "測試通知", "Steam 免費偵測器設定成功", "https://store.steampowered.com/")
+        if not cfg:
+            sys.exit("沒有設定 TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID")
+        notify(cfg, "測試通知", "Steam 免費偵測器設定成功", "https://store.steampowered.com/")
         print("已送出測試通知")
         return
 
@@ -174,8 +189,8 @@ def main(argv):
         info = current[appid]
         url = f"https://store.steampowered.com/app/{appid}/"
         print(f"  新：{info['name']}｜{format_message(info)}｜{url}")
-        if topic and not dry:
-            notify(topic, f"Steam 限時免費：{info['name']}", format_message(info), url)
+        if cfg and not dry:
+            notify(cfg, f"Steam 限時免費：{info['name']}", format_message(info), url)
 
     if dry:
         return

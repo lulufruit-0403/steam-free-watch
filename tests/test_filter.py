@@ -64,5 +64,14 @@ class TestDiff(unittest.TestCase):
         self.assertEqual(items["1"]["name"], "old")  # 保留第一次看到時的資料
 
 
+class TestTelegramText(unittest.TestCase):
+    def test_escapes_html_and_links(self):
+        text = check.build_telegram_text("Steam 限時免費：A & <B>", "遊戲｜原價 NT$ 100",
+                                         "https://store.steampowered.com/app/1/")
+        self.assertIn("<b>Steam 限時免費：A &amp; &lt;B&gt;</b>", text)
+        self.assertIn('<a href="https://store.steampowered.com/app/1/">', text)
+        self.assertNotIn("<B>", text)
+
+
 if __name__ == "__main__":
     unittest.main()
