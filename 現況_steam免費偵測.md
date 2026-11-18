@@ -1,8 +1,12 @@
 # 現況：Steam 限時免費偵測器
 
-最後更新：2026-11-18｜階段：v1 程式完成並在本機測過，尚未放上 GitHub
+最後更新：2026-11-18｜階段：已上 GitHub、Actions 跑過一次成功；尚未設定 ntfy 推播
 
-決定：公開 repo＋ntfy 推播。本資料夾已 git init（main 分支），尚無 remote。
+決定：公開 repo＋ntfy 推播。
+- Repo：https://github.com/lulufruit-0403/steam-free-watch （公開，main 分支）
+- 本機已裝 GitHub CLI 2.104.0（`C:\Program Files\GitHub CLI\gh.exe`），已登入 lulufruit-0403。
+- 本 repo 的 commit 信箱用 GitHub noreply，不用 Gmail。
+- 2026-11-18 第一次 Actions 執行成功：測試通過、Steam 可從 GitHub 機房存取（候選 0 筆）。之後加了「特價清單解析列數」健康檢查。
 
 ## 目標
 偵測 Steam「限時免費領取」（原價 > 0、折扣 100%，領了永久保留），有新的就推播到手機。
@@ -59,11 +63,9 @@ steam-free-watch/
 - 本機實跑：解析 100 列中的 99 列（1 列是套組，依設計略過），appdetails 正常；當下限時免費 0 筆。
 
 ## 還沒確認
-- GitHub 的美國機房 IP 抓 Steam 會不會被擋或拿到不同結果（第一次在 Actions 上跑才知道）。
 - 真的有限時免費時，兩個查詢都抓得到（目前沒有活動可驗證）。
-- 手機推播實際收不收得到（要等使用者設好 ntfy）。
+- 手機推播實際收不收得到。
 
-## 下一步（需要使用者）
-1. 在 GitHub 網頁建一個公開的空 repo（本機沒有 gh CLI），把網址給 Claude → Claude 設定 remote，問過使用者後 push。
-2. 手機裝 ntfy、訂閱一個亂數主題名稱；在 repo 的 Secrets 新增 `NTFY_TOPIC`。
-3. Actions 手動執行「只送測試通知」，確認手機收到。
+## 下一步
+1. push 健康檢查 commit（需使用者同意）。
+2. 使用者手機裝 ntfy、訂閱主題（Claude 已產生亂數名稱，見對話；不寫進 repo）→ `gh secret set NTFY_TOPIC` → `gh workflow run check.yml -f test_notify=true` 確認手機收到。
