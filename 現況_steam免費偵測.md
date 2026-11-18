@@ -39,7 +39,7 @@
 - chat id 的取法：@userinfobot 沒有回應；改在 Telegram 網頁版 https://web.telegram.org/a/ 打開「儲存的訊息」，網址 `#` 後面的數字就是 chat id。
 - 使用者的 Telegram 帳號曾被限制不能建 bot，向 @SpamBot 申訴後已解除（2026-11-19）。
 - 內容：HTML 格式，粗體標題（遊戲名）＋類型｜原價＋商店連結。
-- 舊的 `NTFY_TOPIC` Secret 還在，程式已不再使用。
+- 舊的 `NTFY_TOPIC` Secret 已於 2026-11-19 刪除。
 
 ## Repo 結構（規劃）
 ```
@@ -72,8 +72,7 @@ steam-free-watch/
 - 2026-11-19：commit `bb66d2b` 把推播改成 Telegram 並已 push。測試通知 run https://github.com/lulufruit-0403/steam-free-watch/actions/runs/44342750388 成功，Telegram API 接受了訊息；第二則 run 44343200917 後，使用者確認 iPhone 有跳通知。
 
 ## 下一步
-1. 刪除不用的 Secret `NTFY_TOPIC`（先問過使用者）。
-2. 等下次 Steam 有限時免費時，看有沒有收到通知（驗證偵測邏輯）。
+1. 等下次 Steam 有限時免費時，看有沒有收到通知（驗證偵測邏輯）。
 
 ## 還沒確認
 - 真的有限時免費時，兩個查詢都抓得到（目前沒有活動可驗證）→ 下次 Steam 送遊戲時看有沒有收到通知。
