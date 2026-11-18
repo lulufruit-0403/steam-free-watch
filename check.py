@@ -96,7 +96,12 @@ def fetch_candidates():
             break
     # (2) 雙保險
     d = http_get(SEARCH_URL, {**COMMON, "specials": "1", "sort_by": "Price_ASC", "count": 100})
-    for r in parse_search_html(d.get("results_html", "")):
+    rows = parse_search_html(d.get("results_html", ""))
+    # 健康檢查：特價清單不可能是空的，空的代表被擋或格式變了
+    print(f"特價清單解析：{len(rows)} 列（最低價折扣 {rows[0]['discount'] if rows else '—'}%）")
+    if not rows:
+        raise SystemExit("特價清單是空的：可能被 Steam 擋或網頁格式改了")
+    for r in rows:
         if r["discount"] == 100:
             found.setdefault(r["appid"], r)
     return found
