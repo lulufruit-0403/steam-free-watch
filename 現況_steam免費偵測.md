@@ -62,10 +62,11 @@ steam-free-watch/
 - `.github/workflows/check.yml`：每 4 小時＋手動執行（可勾「只送測試通知」）；有變動才 commit seen.json。
 - 本機實跑：解析 100 列中的 99 列（1 列是套組，依設計略過），appdetails 正常；當下限時免費 0 筆。
 
-## 還沒確認
-- 真的有限時免費時，兩個查詢都抓得到（目前沒有活動可驗證）。
-- 手機推播實際收不收得到。
+- 2026-11-18：Secret `NTFY_TOPIC` 已設定（主題名稱只存在 Secrets 和使用者手機，不寫進 repo）；測試通知已從 Actions 送出；健康檢查在 GitHub 上顯示 99 列，正常。v1 上線，每 4 小時自動執行。
 
-## 下一步
-1. push 健康檢查 commit（需使用者同意）。
-2. 使用者手機裝 ntfy、訂閱主題（Claude 已產生亂數名稱，見對話；不寫進 repo）→ `gh secret set NTFY_TOPIC` → `gh workflow run check.yml -f test_notify=true` 確認手機收到。
+## 還沒確認
+- 真的有限時免費時，兩個查詢都抓得到（目前沒有活動可驗證）→ 下次 Steam 送遊戲時看有沒有收到通知。
+- 使用者手機是否實際收到測試通知（Actions 端已送出）。
+
+## 之後可做（v2）
+- 免費週末分類、IsThereAnyDeal 交叉比對、Epic/GOG。
