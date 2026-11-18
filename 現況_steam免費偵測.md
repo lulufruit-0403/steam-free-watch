@@ -1,6 +1,6 @@
 # 現況：Steam 限時免費偵測器
 
-最後更新：2026-11-18｜階段：已上 GitHub、Actions 跑過一次成功；尚未設定 ntfy 推播
+最後更新：2026-11-18｜階段：v1 上線，偵測正常；推播要從 ntfy 改成 Telegram（ntfy 在 iPhone 不跳通知）
 
 決定：公開 repo＋ntfy 推播。
 - Repo：https://github.com/lulufruit-0403/steam-free-watch （公開，main 分支）
@@ -64,9 +64,27 @@ steam-free-watch/
 
 - 2026-11-18：Secret `NTFY_TOPIC` 已設定（主題名稱只存在 Secrets 和使用者手機，不寫進 repo）；測試通知已從 Actions 送出；健康檢查在 GitHub 上顯示 99 列，正常。v1 上線，每 4 小時自動執行。
 
+## ntfy 在使用者 iPhone 上失敗 → 決定改用 Telegram（2026-11-18）
+- 四則測試都確實到達 ntfy 伺服器（用 `https://ntfy.sh/<topic>/json?poll=1&since=2h` 查得到），App 點進去看得到，但 iOS 從不跳通知。
+- 已試：iOS 通知權限、刪除重訂閱並重開 App、priority 5。都無效。
+- 這是 ntfy iOS 的已知問題：https://docs.ntfy.sh/known-issues/ ；https://github.com/binwiederhier/ntfy/issues/1191
+- **使用者決定改 Telegram。**
+
+## 下一步：改成 Telegram 推播
+1. 使用者在 Telegram 找 @BotFather → `/newbot` 取得 bot token；對自己的 bot 傳一則訊息（不然 bot 不能主動傳給他）。
+2. 使用者用 @userinfobot 之類查自己的 chat id。**不要**用 workflow 印 getUpdates 拿 chat id——公開 repo 的 log 誰都看得到。
+3. **token 與 chat id 由使用者自己在 GitHub 網頁貼進 Secrets**：`TELEGRAM_BOT_TOKEN`、`TELEGRAM_CHAT_ID`（安全規則：Claude 不代填 token）。
+   網址：https://github.com/lulufruit-0403/steam-free-watch/settings/secrets/actions
+4. Claude 改 check.py：`notify()` 改呼叫 `https://api.telegram.org/bot<token>/sendMessage`（POST JSON：chat_id、text，可用 HTML parse_mode 放連結），讀上面兩個環境變數；兩個都沒設時只印出。workflow 的 env 改傳這兩個 secret。測試補一個 format 的案例。
+5. 改完 commit；push 前問使用者。之後 `gh workflow run check.yml -f test_notify=true`，請使用者確認 iPhone 有跳通知。
+6. 確認成功後：刪掉 Secret `NTFY_TOPIC`（先問）、README 改成 Telegram 設定步驟。
+
 ## 還沒確認
 - 真的有限時免費時，兩個查詢都抓得到（目前沒有活動可驗證）→ 下次 Steam 送遊戲時看有沒有收到通知。
-- 使用者手機是否實際收到測試通知（Actions 端已送出）。
+
+## 備註
+- 本機 main 有 1 個現況檔 commit 還沒 push（可跟 Telegram 修改一起 push）。
+- gh 路徑：`C:\Program Files\GitHub CLI\gh.exe`（Bash 用 `/c/Program Files/GitHub CLI/gh.exe`）。
 
 ## 之後可做（v2）
 - 免費週末分類、IsThereAnyDeal 交叉比對、Epic/GOG。
